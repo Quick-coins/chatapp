@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Chat</title>
+		<link rel="stylesheet" href="main.css">
+	</head>
+	<body>
+		<div class="chat">
+			<div class="chat-messages"></div>
+			<textarea placeholder="type fam"></textarea>
+		</div>
+		
+		<script src="http://127.0.0.1:8080/socket.io/socket.io.js"></script>
+		
+		<script>
+		(function() {
+			
+			//get the nodes fam
+			var getNode = function(s){
+				return document.querySelector(s);
+			},
+			sessionID = 'cock' //some bulshit session ting (needs to be the uniqueID)
+			textarea = getNode('.chat textarea'),
+			messages = getNode('.chat-messages');
+			
+			try {
+				var socket = io.connect('http://127.0.0.1:8080');
+				socket.emit('roomjoin', sessionID); //emits sessionID for room assigning
+			} catch (e) {
+				//sets status to warn the don
+			}
+		
+			if(socket !== undefined) {
+				console.log('ok'); //client console log
+				
+				//listen for clearting
+				socket.on('status' ,function(data){
+					if(data.clear === true){
+						textarea.value = '';
+					}
+				});
+			
+				//listen for a slut
+				socket.on('slut', function(data){
+					if(data.length) {
+									
+						// Loop through results
+						for(var x = 0; x < data.length; x = x + 1) {
+							var message = document.createElement('div');
+							
+							if (data[x].name == sessionID){
+								var nick = sessionID;
+							} else {
+								var nick = data[x].name;
+							}
+							
+							message.setAttribute('class', 'chat-message');
+							message.textContent = nick + ': ' + data[x].message; //you might change, might not (if we use something else on our page to talk to them)
+							
+							//Append
+							messages.appendChild(message);
+							messages.insertBefore(message, messages.firstChild);
+						}
+					}
+				});
+				
+				
+				//listen for keydown
+				textarea.addEventListener('keydown', function(event) {
+				var self = this;
+					if(event.which === 13){
+						console.log('cool');
+						socket.emit('input', {
+							name: sessionID,
+							sessionID: sessionID,
+							message: self.value
+						});
+					
+					event.preventDefault();
+					
+					}
+				});
+			} 
+		
+		})();
+		</script>
+	</body>
+</html>

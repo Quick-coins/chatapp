@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Chat</title>
+		<link rel="stylesheet" href="main.css">
+	</head>
+	<body>
+		<div id="whole">
+			<div id="roomtitle" ></div>
+			<div class="connected-clients"></div>
+			<div class="chat">
+				<div class="chat-messages"></div>
+				<textarea placeholder="type fam"></textarea>
+			</div>
+		</div>	
+	
+		<script src="http://127.0.0.1:8080/socket.io/socket.io.js"></script>
+		
+		<script>
+		(function() {
+			
+			//get the nodes fam
+			var getNode = function(s){
+				return document.querySelector(s);
+			},
+			sessionID = 'dick' //some bulshit session ting (needs to be the uniqueID)
+			textarea = getNode('.chat textarea'),
+			messages = getNode('.chat-messages'),
+			mandem = getNode('.connected-clients');
+			
+			try {
+				var socket = io.connect('http://127.0.0.1:8080');
+				socket.emit('roomjoin', sessionID); //emits sessionID for room assigning
+			} catch (e) {
+				//sets status to warn the don
+			}
+		
+			if(socket !== undefined) {
+				console.log('ok'); //client console log
+				//listen for clearting
+				socket.on('status' ,function(data){
+					if(data.clear === true){
+						textarea.value = '';
+					}
+				});
+				
+
+					//listen for clients array
+					socket.on('mans', function(data){
+					clients = data;
+					console.log(clients);
+					mandem.innerHTML = "";
+				
+					var keys = [];
+						for (var key in clients) {
+							keys.push(key);
+							console.log(keys);
+						}
+						for (i=0;i<keys.length;i++){
+						
+							var man = document.createElement('div');
+							
+							
+							man.setAttribute('class', 'man-ting');	
+							man.textContent = clients[keys[i]];
+							man.id = man.innerHTML;	
+							man.onclick = function(){
+								var hypest = event.srcElement.id;
+								//socket.emit('lick', hypest);
+								//console.log(hypest);
+								
+								messages.innerHTML = '';
+								socket.emit('roomjoin', hypest);
+								roomtitle.innerHTML = hypest;
+								
+								
+								
+							};
+							
+							//Append
+							mandem.appendChild(man);
+							mandem.insertBefore(man, mandem.firstChild);
+						}
+					});
+				
+				//CLICK ON ID, goes to chat in that room!
+						
+							
+				//listen for a slut
+				socket.on('slut', function(data){
+					if(data.length) {
+						// Loop through results
+						for(var x = 0; x < data.length; x++) {
+							var message = document.createElement('div');
+							
+							if (data[x].name == 'Quick-coins'){
+								var nick = 'Quick-coins';
+							} else {
+								var nick = data[x].name;
+							}
+							
+							message.setAttribute('class', 'chat-message');
+							message.textContent = nick + ': ' + data[x].message; //us is displayed on all messages. 
+							
+							//Append
+							messages.appendChild(message);
+							messages.insertBefore(message, messages.firstChild);
+						}
+					}
+				});
+				
+				
+				
+				
+				//listen for keydown
+				//still only emits to dick, need to emit to whatever room is joined 
+				textarea.addEventListener('keydown', function(event) {
+				var self = this;
+					if(event.which === 13){
+						console.log('cool');
+						roomemit = roomtitle.innerHTML;
+						console.log(roomemit);
+						socket.emit('input', {
+							name: 'Quick-coins',
+							sessionID: roomemit, //needs to change. 
+							message: self.value
+						});
+					
+					event.preventDefault();
+					
+					}
+				});
+			} 
+		
+		})();
+		</script>
+	</body>
+</html>
